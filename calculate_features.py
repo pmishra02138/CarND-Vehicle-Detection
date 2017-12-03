@@ -4,6 +4,7 @@ import numpy as np
 import cv2
 import glob
 import time
+import pickle
 from sklearn.svm import LinearSVC
 from sklearn.preprocessing import StandardScaler
 from skimage.feature import hog
@@ -12,16 +13,8 @@ from skimage.feature import hog
 from sklearn.model_selection import train_test_split
 # from sklearn.cross_validation import train_test_split
 
-def convert_color(img, conv='RGB2YCrCb'):
-    if conv == 'RGB2YCrCb':
-        return cv2.cvtColor(img, cv2.COLOR_RGB2YCrCb)
-    if conv == 'BGR2YCrCb':
-        return cv2.cvtColor(img, cv2.COLOR_BGR2YCrCb)
-    if conv == 'RGB2LUV':
-        return cv2.cvtColor(img, cv2.COLOR_RGB2LUV)
-
 # Define a function to do color conversion
-def color_conversion(img, cspace='RGB'):
+def color_conversion(img, cspace='YCrCb'):
     # apply color conversion if other than 'RGB'
     if cspace != 'RGB':
         if cspace == 'HSV':
@@ -54,6 +47,7 @@ def color_hist(img, nbins=32, bins_range=(0, 256)):
     # Concatenate the histograms into a single feature vector
     hist_features = np.concatenate((channel1_hist[0], channel2_hist[0], channel3_hist[0]))
     # Return the individual histograms, bin_centers and feature vector
+
     return hist_features
 
 # Define a function to return HOG features and visualization
@@ -70,13 +64,14 @@ def get_hog_features(img, orient, pix_per_cell, cell_per_block,
         features = hog(img, orientations=orient, pixels_per_cell=(pix_per_cell, pix_per_cell),
                        cells_per_block=(cell_per_block, cell_per_block), transform_sqrt=True,
                        visualise=vis, feature_vector=feature_vec)
+
         return features
 
 
 # Define a function to extract features from a list of images
-def extract_features(imgs, cspace='RGB', spatial_size=(32, 32),
+def extract_features(imgs, cspace, spatial_size=(32, 32),
                         hist_bins=32, orient=9,
-                        pix_per_cell=8, cell_per_block=2, hog_channel=0):
+                        pix_per_cell=8, cell_per_block=2, hog_channel='ALL'):
     # Create an empty features list
     features = []
     # feature_array
@@ -86,7 +81,7 @@ def extract_features(imgs, cspace='RGB', spatial_size=(32, 32),
         image = mpimg.imread(img)
 
         # 1) Apply color conversion if other than 'RGB'
-        feature_image = color_conversion(image, cspace='RGB')
+        feature_image = color_conversion(image)
 
         # # 2) Compute spatial features if flag is set
         spatial_features = bin_spatial(feature_image, size=spatial_size)
@@ -95,13 +90,14 @@ def extract_features(imgs, cspace='RGB', spatial_size=(32, 32),
         hist_features = color_hist(feature_image, nbins=hist_bins)
 
         # 4) Compute hog features: get_hog_features() with vis=False, feature_vec=True
-        if hog_channel == 'ALL':
+        if (hog_channel == 'ALL'):
             hog_features = []
             for channel in range(feature_image.shape[2]):
                 hog_features.append(get_hog_features(feature_image[:,:,channel],
                                     orient, pix_per_cell, cell_per_block,
                                     vis=False, feature_vec=True))
             hog_features = np.ravel(hog_features)
+            # print("hog_features", np.asarray(hog_features).shape)
         else:
             hog_features = get_hog_features(feature_image[:,:,hog_channel], orient,
                         pix_per_cell, cell_per_block, vis=False, feature_vec=True)
@@ -130,18 +126,22 @@ if __name__ == '__main__':
     notcars = notcars[0:sample_size]
 
     ### Tweak these parameters and see how the results change.
-    colorspace = 'RGB' # Can be RGB, HSV, LUV, HLS, YUV, YCrCb
+    colorspace = 'YCrCb' # Can be RGB, HSV, LUV, HLS, YUV, YCrCb
     orient = 9
     pix_per_cell = 8
     cell_per_block = 2
-    hog_channel = 0 # Can be 0, 1, 2, or "ALL"
+    hog_channel = "ALL" # Can be 0, 1, 2, or "ALL"
+    spatial_size = (32, 32)
+    hist_bins = 32
 
     t=time.time()
     car_features = extract_features(cars, cspace=colorspace, orient=orient,
                             pix_per_cell=pix_per_cell, cell_per_block=cell_per_block,
+                            spatial_size = spatial_size, hist_bins = hist_bins,
                             hog_channel=hog_channel)
     notcar_features = extract_features(notcars, cspace=colorspace, orient=orient,
                             pix_per_cell=pix_per_cell, cell_per_block=cell_per_block,
+                            spatial_size = spatial_size, hist_bins=hist_bins,
                             hog_channel=hog_channel)
     t2 = time.time()
     print(round(t2-t, 2), 'Seconds to extract HOG features...')
@@ -180,3 +180,9 @@ if __name__ == '__main__':
     print('For these',n_predict, 'labels: ', y_test[0:n_predict])
     t2 = time.time()
     print(round(t2-t, 5), 'Seconds to predict', n_predict,'labels with SVC')
+
+    # Save SVM model and other paramters in a pickle file
+    pickle.dump( { 'svc': svc, 'X_scaler': X_scaler, 'orient': orient,
+                    'pix_per_cell' : pix_per_cell, 'cell_per_block' : cell_per_block,
+                    "spatial_size": spatial_size, "hist_bins": hist_bins},
+                    open('svc_pickle.p', 'wb'))
