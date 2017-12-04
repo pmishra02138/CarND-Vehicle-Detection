@@ -2,7 +2,7 @@
 [![Udacity - Self-Driving Car NanoDegree](https://s3.amazonaws.com/udacity-sdc/github/shield-carnd.svg)](http://www.udacity.com/drive)
 
 
-In this project, your goal is to write a software pipeline to detect vehicles in a video.  Check out the [writeup]https://github.com/pmishra02138/CarND-Vehicle-Detection/blob/master/writeup.md) for detailed description.  
+In this project, your goal is to write a software pipeline to detect vehicles in a video.  Check out the [writeup](https://github.com/pmishra02138/CarND-Vehicle-Detection/blob/master/writeup.md) for detailed description.  
 
 The Project
 ---
