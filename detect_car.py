@@ -30,9 +30,10 @@ if __name__ == '__main__':
 
     from moviepy.editor import VideoFileClip
 
-    output_video = 'car_video_output.mp4'
-    # clip1 = VideoFileClip("challenge_video.mp4")
+    #output_video = 'test_car_video_output.mp4'
+    output_video = 'test_car_video_output.mp4'
 
+    # clip1 = VideoFileClip("test_video.mp4")
     clip1 = VideoFileClip("project_video.mp4")
     clip = clip1.fl_image(detect_vehicle)
     clip.write_videofile(output_video, audio=False)
