@@ -8,10 +8,10 @@ import pickle
 from sklearn.svm import LinearSVC
 from sklearn.preprocessing import StandardScaler
 from skimage.feature import hog
-# NOTE: the next import is only valid for scikit-learn version <= 0.17
-# for scikit-learn >= 0.18 use:
 from sklearn.model_selection import train_test_split
-# from sklearn.cross_validation import train_test_split
+
+import warnings
+warnings.filterwarnings("ignore")
 
 # Define a function to do color conversion
 def color_conversion(img, cspace='YCrCb'):
@@ -69,7 +69,7 @@ def get_hog_features(img, orient, pix_per_cell, cell_per_block,
 
 
 # Define a function to extract features from a list of images
-def extract_features(imgs, cspace, spatial_size=(32, 32),
+def extract_features(imgs, spatial_size=(32, 32),
                         hist_bins=32, orient=9,
                         pix_per_cell=8, cell_per_block=2, hog_channel='ALL'):
     # Create an empty features list
@@ -121,12 +121,12 @@ if __name__ == '__main__':
 
     # Reduce the sample size because HOG features are slow to compute
     # The quiz evaluator times out after 13s of CPU time
-    sample_size = 500
-    cars = cars[0:sample_size]
-    notcars = notcars[0:sample_size]
+    # sample_size = 500
+    # cars = cars[0:sample_size]
+    # notcars = notcars[0:sample_size]
 
     ### Tweak these parameters and see how the results change.
-    colorspace = 'YCrCb' # Can be RGB, HSV, LUV, HLS, YUV, YCrCb
+    # colorspace = 'YCrCb' # Can be RGB, HSV, LUV, HLS, YUV, YCrCb
     orient = 9
     pix_per_cell = 8
     cell_per_block = 2
@@ -135,14 +135,12 @@ if __name__ == '__main__':
     hist_bins = 32
 
     t=time.time()
-    car_features = extract_features(cars, cspace=colorspace, orient=orient,
+    car_features = extract_features(cars, orient=orient, hog_channel=hog_channel,
                             pix_per_cell=pix_per_cell, cell_per_block=cell_per_block,
-                            spatial_size = spatial_size, hist_bins = hist_bins,
-                            hog_channel=hog_channel)
-    notcar_features = extract_features(notcars, cspace=colorspace, orient=orient,
+                            spatial_size = spatial_size, hist_bins = hist_bins)
+    notcar_features = extract_features(notcars, orient=orient, hog_channel=hog_channel,
                             pix_per_cell=pix_per_cell, cell_per_block=cell_per_block,
-                            spatial_size = spatial_size, hist_bins=hist_bins,
-                            hog_channel=hog_channel)
+                            spatial_size = spatial_size, hist_bins=hist_bins)
     t2 = time.time()
     print(round(t2-t, 2), 'Seconds to extract HOG features...')
     # Create an array stack of feature vectors
