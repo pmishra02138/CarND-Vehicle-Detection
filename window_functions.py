@@ -78,8 +78,8 @@ def find_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, ce
                 win_draw = np.int(window*scale)
 
                 bboxes.append(((xbox_left, ytop_draw+ystart),(xbox_left+win_draw,ytop_draw+win_draw+ystart)))
-                # cv2.rectangle(draw_img,(xbox_left, ytop_draw+ystart),(xbox_left+win_draw,ytop_draw+win_draw+ystart),(0,0,255),6)
-    return bboxes #draw_img, bboxes
+
+    return bboxes 
 
 def draw_bboxes(img, bboxes, color=(0, 0, 255), thick=6):
     # Make a copy of the image
