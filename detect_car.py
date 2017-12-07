@@ -31,7 +31,7 @@ if __name__ == '__main__':
     from moviepy.editor import VideoFileClip
 
     #output_video = 'test_car_video_output.mp4'
-    output_video = 'car_video_output_2.mp4'
+    output_video = 'car_video_output.mp4'
 
     # clip1 = VideoFileClip("test_video.mp4")
     clip1 = VideoFileClip("project_video.mp4")#.subclip(25,32)
