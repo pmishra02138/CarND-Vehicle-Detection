@@ -5,6 +5,7 @@ def detect_vehicle(img):
     ystart = 400
     ystop = 656
     scale = 1.5
+    threshold = 0.8
 
     bboxes = find_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins)
 
@@ -13,10 +14,9 @@ def detect_vehicle(img):
     # Add heat to each box in box list
     heat = np.zeros_like(img[:,:,0]).astype(np.float)
     heat = add_heat(heat, bboxes)
-
     # Apply threshold to help remove false positives
-    heat = apply_threshold(heat,0)
-
+    # heat = apply_threshold(heat, threshold)
+    history = apply_threshold(heat, threshold)
     # Visualize the heatmap when displaying
     heatmap = np.clip(heat, 0, 255)
 
@@ -31,9 +31,9 @@ if __name__ == '__main__':
     from moviepy.editor import VideoFileClip
 
     #output_video = 'test_car_video_output.mp4'
-    output_video = 'test_car_video_output.mp4'
+    output_video = 'car_video_output_2.mp4'
 
     # clip1 = VideoFileClip("test_video.mp4")
-    clip1 = VideoFileClip("project_video.mp4")
+    clip1 = VideoFileClip("project_video.mp4")#.subclip(25,32)
     clip = clip1.fl_image(detect_vehicle)
     clip.write_videofile(output_video, audio=False)

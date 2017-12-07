@@ -79,7 +79,7 @@ def find_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, ce
 
                 bboxes.append(((xbox_left, ytop_draw+ystart),(xbox_left+win_draw,ytop_draw+win_draw+ystart)))
 
-    return bboxes 
+    return bboxes
 
 def draw_bboxes(img, bboxes, color=(0, 0, 255), thick=6):
     # Make a copy of the image
@@ -91,6 +91,9 @@ def draw_bboxes(img, bboxes, color=(0, 0, 255), thick=6):
     # Return the image copy with boxes drawn
     return imcopy
 
+from collections import deque
+
+history = deque(maxlen=5) # where n_frames is number of history frames
 
 def add_heat(heatmap, bbox_list):
     # Iterate through list of bboxes
@@ -99,8 +102,12 @@ def add_heat(heatmap, bbox_list):
         # Assuming each "box" takes the form ((x1, y1), (x2, y2))
         heatmap[box[0][1]:box[1][1], box[0][0]:box[1][0]] += 1
 
+    history.append(heatmap)
+    heatmap = np.mean(history,0)
+    # Apply threshold to help remove false positives
+
     # Return updated heatmap
-    return heatmap # Iterate through list of bboxes
+    return heatmap #heatmap # Iterate through list of bboxes
 
 def apply_threshold(heatmap, threshold):
     # Zero out pixels below the threshold
@@ -129,7 +136,7 @@ if __name__ == '__main__':
     ystop = 656
     scale = 1.5
     # Read in an image
-    image_files = glob.glob('test_images/*.jpg')
+    image_files = glob.glob('test_images/test4.jpg')
 
     # Go through every file
     for image_file in image_files:
@@ -154,6 +161,17 @@ if __name__ == '__main__':
         draw_img = draw_labeled_bboxes(np.copy(img), labels)
 
         # Show final image with bounding boxes
-        plt.imshow(draw_img)
-        plt.pause(1)
-        plt.draw()
+        # plt.imshow(heat)
+        # plt.show()
+
+        #===
+        fig = plt.figure()
+        plt.subplot(121)
+        plt.imshow(out_img)
+        plt.title('Test Car Image 1')
+        plt.subplot(122)
+        plt.imshow(heat, cmap='gray')
+        plt.title('Heatmap 1')
+
+        plt.tight_layout()
+        plt.show()
